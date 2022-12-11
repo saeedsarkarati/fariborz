@@ -13,13 +13,13 @@ def ssinit():
 		global wx0, wy0, wxl, wyl
 		wx0, wy0, wxl, wyl = 200, 200, 1200, 800
 		global L, W, nL, E, nE, ws, wb, FI, nB, B, nR, R
-		nL = 21
+		nL = 24
 		L = []
 		nE = nL
 		E = []
 		FI = 2
 		B = []
-		nB = 3
+		nB = 4
 		R = []
 		nR = 6
 	# ~ global wg
@@ -35,15 +35,17 @@ def sslabels():
 	for i in range (nL):
 		L.append (QLabel( parent = W))
 		# ~ L[i].setText (str(i+10) )
-		L[i].setGeometry(920- (i//11) * 500, 100 + (i%11)*50, 180, 40)
+		L[i].setGeometry(920- (i//12) * 500, 100 + (i%12)*50, 180, 40)
 		L[i].setText(ws.cell(1, i+1).value)
 
 def ssedits():
 	for i in range (nE):
 		E.append (QLineEdit( parent = W))
 		# ~ E[i].setText (str(i+10) )
-		E[i].setGeometry(800 - 500 * (i//11), 100 + (i% 11)*50, 120, 40)
+		E[i].setGeometry(800 - 500 * (i//12), 100 + (i% 12)*50, 120, 40)
 		E[i].setText(str(ws.cell(2, i + 1).value))
+		E[i].textChanged.connect(partial(textchanged, i))
+
 	E[0].setEnabled(False)
 	E[1].setEnabled(False)
 	E[2].setEnabled(False)
@@ -59,8 +61,13 @@ def sseditsset():
 		if ss == 'None':
 			ss = ''
 		E[i].setText(ss)
+def editstocells():
+	for i in range (nE):
+		ws.cell(FI, i+1).value = E[i].text()
+		print((E[i].text()))
+	sseditsset()
 def ssaction(i):
-	global FI
+	global FI, wb
 	# ~ print (B[i].text(), FI)
 	if i == 0:
 		FI += 1
@@ -74,7 +81,17 @@ def ssaction(i):
 	sseditsset()
 	if i == 2:
 		tokenf9.token9(ws, FI)
+	if i == 3:
+		editstocells()
+#		pass
+		wb.save(ename)
 		
+def textchanged (i):
+	global FI, wb, ws
+	ws.cell(FI, i + 1).value = str(E[i].text())
+	#E[i].setStyleSheet("QLineEdit {color: red; }")
+	print('44', FI, i)
+	#wb.save(ename)
 
 def ssbuttons():
 	for i in range (nB):
@@ -85,9 +102,10 @@ def ssbuttons():
 	B[0].setText('next')
 	B[1].setText('previous')
 	B[2].setText('صدور توکن شارژ')
+	B[3].setText('اصلاح پرونده')
 def ssradios():
 	for i in range (nL):
-		L.append (QLabel( parent = W))
+		R.append (QLabel( parent = W))
 		L[i].setGeometry(920- (i//11) * 500, 100 + (i%11)*50, 180, 40)
 		L[i].setText(ws.cell(1, i+1).value)
 
@@ -95,7 +113,8 @@ ssinit()
 
 app = QApplication(sys.argv)
 W = MainWindow()
-wb = load_workbook(filename = 'f1.xlsx')
+ename = '20.xlsx'
+wb = load_workbook(filename = ename)
 ws = wb.active
 print (ws.max_row)
 print (ws.max_column)
